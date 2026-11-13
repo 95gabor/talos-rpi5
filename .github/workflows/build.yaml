@@ -20,10 +20,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # bldr needs the docker-container driver (mergeop); --output=type=docker
+      # still loads the overlay into the local image store
       - uses: docker/setup-buildx-action@v3
-        with:
-          # The overlay build exports into the local docker image store
-          driver: docker
 
       - name: Prepare sbc-raspberrypi
         run: ./build-rpi5.sh prepare
