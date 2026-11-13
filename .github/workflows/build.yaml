@@ -1,0 +1,65 @@
+name: build
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  packages: write
+
+env:
+  INSTALLER_IMAGE: ghcr.io/${{ github.repository_owner }}/talos-rpi5-installer
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+        with:
+          # The overlay build exports into the local docker image store
+          driver: docker
+
+      - name: Prepare sbc-raspberrypi
+        run: ./build-rpi5.sh prepare
+
+      - name: Build overlay
+        run: ./build-rpi5.sh overlay
+
+      - name: Build disk image
+        run: ./build-rpi5.sh image
+
+      - name: Build installer
+        run: ./build-rpi5.sh installer
+
+      - name: Fix artifact ownership
+        run: sudo chown -R "$(id -u):$(id -g)" _out
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: metal-arm64.raw.xz
+          path: _out/metal-arm64.raw.xz
+
+      - name: Push installer
+        if: github.event_name != 'pull_request'
+        run: |
+          set -euo pipefail
+          talos_version="$(grep -m1 '^TALOS_VERSION=' build-rpi5.sh | sed -E 's/.*:-(v[^}]+)}.*/\1/')"
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+          image="$(docker load -i _out/installer-arm64.tar | sed -n 's/^Loaded image: //p')"
+          for tag in "${talos_version}" "${talos_version}-${GITHUB_SHA::7}"; do
+            docker tag "${image}" "${INSTALLER_IMAGE}:${tag}"
+            docker push "${INSTALLER_IMAGE}:${tag}"
+          done
+          echo "Pushed ${INSTALLER_IMAGE}:${talos_version}-${GITHUB_SHA::7}" >> "${GITHUB_STEP_SUMMARY}"
+
+      - name: Release
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "${GITHUB_REF_NAME}" _out/metal-arm64.raw.xz --generate-notes

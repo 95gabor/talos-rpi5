@@ -1,0 +1,5 @@
+/_out/
+# Cloned by `./build-rpi5.sh prepare`
+/sbc-raspberrypi/
+/talos/
+.DS_Store

@@ -1,0 +1,25 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: talos-build <talos-build@local>
+Date: Wed, 27 May 2026 14:00:00 +0000
+Subject: [PATCH] ARM: dts: bcm2712-rpi-5-b: add sd_poll_once config.txt param
+
+Pi 5 Model B only exposes sd_cqe in __overrides__, so dtparam=sd_poll_once
+in config.txt is ignored and the kernel keeps probing the empty microSD
+slot (~10s mmc0 SDHCI cmd timeouts on USB/NVMe boot).
+
+Match CM5 (linux pull/6744): map sd_poll_once to non-removable? on &sdio1.
+---
+ arch/arm64/boot/dts/broadcom/bcm2712-rpi-5-b.dts | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/broadcom/bcm2712-rpi-5-b.dts b/arch/arm64/boot/dts/broadcom/bcm2712-rpi-5-b.dts
+--- a/arch/arm64/boot/dts/broadcom/bcm2712-rpi-5-b.dts
++++ b/arch/arm64/boot/dts/broadcom/bcm2712-rpi-5-b.dts
+@@ -562,6 +562,8 @@
+ / {
+ 	__overrides__ {
++		sd = <&sdio1>, "status";
++		sd_poll_once = <&sdio1>, "non-removable?";
+ 		sd_cqe = <&sdio1>, "supports-cqe:0";
+ 	};
+ };
