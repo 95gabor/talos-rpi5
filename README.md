@@ -10,6 +10,7 @@ The upstream `rpi_5` overlay does not boot on all Pi 5 boards ([sbc-raspberrypi#
 Kernel args baked into the images (`EXTRA_KERNEL_ARGS`):
 
 - `usb-storage.delay_use=0` — attach the USB SSD without the default 1s delay. Without it Talos may look for the `STATE` partition before the disk shows up, find no machine config and boot into maintenance mode.
+- `talos.device.settle_time=3s` — wait 3s after udev settles before Talos looks for its volumes. Even with `delay_use=0` the SSD partitions appear ~100ms after Talos marks `STATE` missing, so it enters maintenance mode and never retries.
 
 DT patch `0014` disables the microSD controller (`&sdio1`) for USB/NVMe boot; `config.txt` sets `sd=off`. This stops perpetual `mmc0` SDHCI timeouts ([#92](https://github.com/siderolabs/sbc-raspberrypi/issues/92)). Re-enable the slot only if you rebuild without `0014` and use `sd=on` in `config.txt`.
 

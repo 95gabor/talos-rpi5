@@ -42,10 +42,10 @@ ARCH="${ARCH:-arm64}"
 CONFIG_TXT_APPEND="${CONFIG_TXT_APPEND:-sd=off
 usb_max_current_enable=1}"
 
-# usb-storage.delay_use=0: attach the USB SSD without the default 1s delay,
-# otherwise STATE is not found in time on boot and the node falls into
-# maintenance mode.
-EXTRA_KERNEL_ARGS="${EXTRA_KERNEL_ARGS:-usb-storage.delay_use=0}"
+# The USB SSD shows up after udev settles, so Talos marks STATE missing and
+# boots into maintenance mode. usb-storage.delay_use=0 drops the default 1s
+# attach delay; talos.device.settle_time=3s makes Talos wait for it.
+EXTRA_KERNEL_ARGS="${EXTRA_KERNEL_ARGS:-usb-storage.delay_use=0 talos.device.settle_time=3s}"
 
 # U-Boot release tarball mirror. ftp.denx.de is often unreachable; the Buildroot
 # mirror serves the identical tarball and the sha256/sha512 in the Pkgfile are
@@ -195,7 +195,7 @@ Environment:
   PKGS, TOOLS          pkgs/tools versions aligned with Talos release
   OUT_DIR              Output directory (default: ./_out)
   CONFIG_TXT_APPEND    config.txt lines (default disables microSD for USB/NVMe boot)
-  EXTRA_KERNEL_ARGS    Space separated kernel args (default: usb-storage.delay_use=0)
+  EXTRA_KERNEL_ARGS    Space separated kernel args (default: usb-storage.delay_use=0 talos.device.settle_time=3s)
   UBOOT_MIRROR         U-Boot tarball base URL (default: https://sources.buildroot.net/uboot)
 
 Output artifacts:
