@@ -113,10 +113,11 @@ publish_overlay_to_registry() {
 	fi
 }
 
-# run_imager <output yaml block> <profile name>
+# run_imager <output yaml block> <profile name> [extra yaml block]
 run_imager() {
 	local output="$1"
 	local profile_file="${OUT_DIR}/imager-profile-$2.yaml"
+	local extra="${3:-}"
 
 	cat >"${profile_file}" <<EOF
 arch: ${ARCH}
@@ -134,6 +135,7 @@ overlay:
   options:
     configTxtAppend: |
 $(echo "${CONFIG_TXT_APPEND}" | sed 's/^/      /')
+${extra}
 EOF
 
 	echo "==> Running ${IMAGER_IMAGE} with profile $2"
@@ -166,9 +168,14 @@ build_installer() {
 	publish_overlay_to_registry
 	docker pull "${IMAGER_IMAGE}"
 
+	# The installer embeds the overlay installer, which the imager pulls from
+	# input.overlayInstaller (not from overlay.image).
 	run_imager "output:
   kind: installer
-  outFormat: raw" installer
+  outFormat: raw" installer "input:
+  overlayInstaller:
+    imageRef: ${IMAGER_OVERLAY_REF}
+    forceInsecure: true"
 }
 
 usage() {
