@@ -118,7 +118,7 @@ export TOOLS=v1.13.0-2-g1fb762a
 
 ## How it works
 
-1. **Prepare** — clone `sbc-raspberrypi` at `SBC_BASE`, `git am` the PR #88 patch, copy the DT patches.
+1. **Prepare** — clone `sbc-raspberrypi` at `SBC_BASE`, `git am` the PR #88 patch, copy the DT patches, point the U-Boot source at `UBOOT_MIRROR` (default: the Buildroot mirror, since `ftp.denx.de` is often unreachable; the tarball checksums in the Pkgfile are still verified).
 2. **Overlay** — `make docker-sbc-raspberrypi` in `sbc-raspberrypi`.
 3. **Registry** — overlay pushed to local `registry:2` on port 5001 for the imager container.
 4. **Imager** — `ghcr.io/siderolabs/imager:v1.13.2` with the `rpi_5` overlay, `configTxtAppend` and `EXTRA_KERNEL_ARGS`, once for the disk image and once for the installer.

@@ -47,6 +47,11 @@ usb_max_current_enable=1}"
 # maintenance mode.
 EXTRA_KERNEL_ARGS="${EXTRA_KERNEL_ARGS:-usb-storage.delay_use=0}"
 
+# U-Boot release tarball mirror. ftp.denx.de is often unreachable; the Buildroot
+# mirror serves the identical tarball and the sha256/sha512 in the Pkgfile are
+# still verified. Set to https://ftp.denx.de/pub/u-boot to use upstream.
+UBOOT_MIRROR="${UBOOT_MIRROR:-https://sources.buildroot.net/uboot}"
+
 prepare() {
 	echo "==> Preparing ${SBC_DIR} at ${SBC_BASE}"
 	if [[ ! -d "${SBC_DIR}/.git" ]]; then
@@ -55,11 +60,13 @@ prepare() {
 	(
 		cd "${SBC_DIR}"
 		git fetch origin
-		git checkout --detach "${SBC_BASE}"
+		git checkout -f --detach "${SBC_BASE}"
 		git clean -fdq artifacts/dtb/raspberrypi/patches
 		git -c user.name=build -c user.email=build@localhost am --quiet --whitespace=nowarn "${ROOT}"/patches/sbc-raspberrypi/*.patch
 	)
 	cp "${ROOT}"/patches/dtb/*.patch "${SBC_DIR}/artifacts/dtb/raspberrypi/patches/"
+	sed -i.bak "s|https://ftp.denx.de/pub/u-boot|${UBOOT_MIRROR}|" "${SBC_DIR}/artifacts/u-boot/pkg.yaml"
+	rm -f "${SBC_DIR}/artifacts/u-boot/pkg.yaml.bak"
 }
 
 build_overlay() {
@@ -182,6 +189,7 @@ Environment:
   OUT_DIR              Output directory (default: ./_out)
   CONFIG_TXT_APPEND    config.txt lines (default disables microSD for USB/NVMe boot)
   EXTRA_KERNEL_ARGS    Space separated kernel args (default: usb-storage.delay_use=0)
+  UBOOT_MIRROR         U-Boot tarball base URL (default: https://sources.buildroot.net/uboot)
 
 Output artifacts:
   \${OUT_DIR}/metal-arm64.raw.xz
