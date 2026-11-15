@@ -34,6 +34,22 @@ talosctl upgrade -n <node> --image ghcr.io/95gabor/talos-rpi5-installer:v1.14.6
 
 Use the same image as `machine.install.image` in the machine config.
 
+## Build locally and push (faster than CI)
+
+The GitHub Action takes about 1.5 hours; a local build on Apple silicon (native arm64, no qemu) takes
+about 4 minutes. For a Talos bump:
+
+1. Bump `TALOS_VERSION` and the matching `PKGS` / `TOOLS` in `build-rpi5.sh`. Take them from the `PKGS ?=` and
+   `TOOLS ?=` lines of the [Talos `Makefile`](https://github.com/siderolabs/talos/blob/main/Makefile) at the release tag.
+2. `./build-rpi5.sh prepare && ./build-rpi5.sh overlay && ./build-rpi5.sh installer`
+3. Log in to ghcr with a token that has `write:packages` (`gh auth refresh -h github.com -s write:packages`,
+   then `gh auth token | docker login ghcr.io -u 95gabor --password-stdin`).
+4. `docker load -i _out/installer-arm64.tar` prints the image name (`ghcr.io/siderolabs/installer-base:<version>`);
+   tag it as `ghcr.io/95gabor/talos-rpi5-installer:<version>` and `...:<version>-<short sha>` and `docker push` both.
+5. Merge to `main`. The Action then rebuilds and overwrites the same tags.
+
+This installer is for the Raspberry Pi 5 only. The Pi 4 nodes use the factory installer.
+
 ## Quick build
 
 ```bash
