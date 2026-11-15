@@ -1,6 +1,6 @@
 # Talos Raspberry Pi 5 image build
 
-Build a **Raspberry Pi 5** Talos disk image and installer image for **USB SSD / NVMe boot** with release **v1.14.5**.
+Build a **Raspberry Pi 5** Talos disk image and installer image for **USB SSD / NVMe boot** with release **v1.14.6**.
 
 The upstream `rpi_5` overlay does not boot on all Pi 5 boards ([sbc-raspberrypi#96](https://github.com/siderolabs/sbc-raspberrypi/issues/96)), so the overlay is built from upstream `sbc-raspberrypi` (`bc6af94`, v0.2.0) plus:
 
@@ -29,7 +29,7 @@ The disk image is uploaded as a workflow artifact, and attached to a GitHub rele
 Upgrade a node in place (keeps the machine config and `EPHEMERAL`):
 
 ```bash
-talosctl upgrade -n <node> --image ghcr.io/95gabor/talos-rpi5-installer:v1.14.5
+talosctl upgrade -n <node> --image ghcr.io/95gabor/talos-rpi5-installer:v1.14.6
 ```
 
 Use the same image as `machine.install.image` in the machine config.
@@ -110,10 +110,10 @@ Based on [serialx’s fan-control gist](https://gist.github.com/serialx/d3213768
 ## Overrides
 
 ```bash
-export TALOS_VERSION=v1.14.5
+export TALOS_VERSION=v1.14.6
 export OVERLAY_TAG=pr88
-export PKGS=v1.14.0-48-gf4bda77
-export TOOLS=v1.14.0-11-g8dad45e
+export PKGS=v1.14.0-59-ge6ad19d
+export TOOLS=v1.14.0-12-g5959f76
 ./build-rpi5.sh all
 ```
 
@@ -122,4 +122,4 @@ export TOOLS=v1.14.0-11-g8dad45e
 1. **Prepare** — clone `sbc-raspberrypi` at `SBC_BASE`, `git am` the PR #88 patch, copy the DT patches, point the U-Boot source at `UBOOT_MIRROR` (default: the Buildroot mirror, since `ftp.denx.de` is often unreachable; the tarball checksums in the Pkgfile are still verified).
 2. **Overlay** — `make docker-sbc-raspberrypi` in `sbc-raspberrypi`.
 3. **Registry** — overlay pushed to local `registry:2` on port 5001 for the imager container.
-4. **Imager** — `ghcr.io/siderolabs/imager:v1.14.5` with the `rpi_5` overlay, `configTxtAppend` and `EXTRA_KERNEL_ARGS`, once for the disk image and once for the installer.
+4. **Imager** — `ghcr.io/siderolabs/imager:v1.14.6` with the `rpi_5` overlay, `configTxtAppend` and `EXTRA_KERNEL_ARGS`, once for the disk image and once for the installer.

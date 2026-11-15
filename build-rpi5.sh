@@ -19,16 +19,16 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SBC_DIR="${ROOT}/sbc-raspberrypi"
 OUT_DIR="${OUT_DIR:-${ROOT}/_out}"
 
-TALOS_VERSION="${TALOS_VERSION:-v1.14.5}"
+TALOS_VERSION="${TALOS_VERSION:-v1.14.6}"
 IMAGER_IMAGE="${IMAGER_IMAGE:-ghcr.io/siderolabs/imager:${TALOS_VERSION}}"
 
 # Upstream sbc-raspberrypi commit the patches in ./patches apply to (v0.2.2)
 SBC_REPO="${SBC_REPO:-https://github.com/siderolabs/sbc-raspberrypi.git}"
 SBC_BASE="${SBC_BASE:-v0.2.2}"
 
-# Match pkgs/tools used by Talos v1.14.5 release builds
-PKGS="${PKGS:-v1.14.0-48-gf4bda77}"
-TOOLS="${TOOLS:-v1.14.0-11-g8dad45e}"
+# Match pkgs/tools used by Talos v1.14.6 release builds
+PKGS="${PKGS:-v1.14.0-59-ge6ad19d}"
+TOOLS="${TOOLS:-v1.14.0-12-g5959f76}"
 
 OVERLAY_REGISTRY="${OVERLAY_REGISTRY:-local}"
 OVERLAY_USER="${OVERLAY_USER:-sbc-raspberrypi}"
@@ -189,7 +189,7 @@ Usage: $(basename "$0") [prepare|overlay|image|installer|all]
   all         overlay, image, installer (default)
 
 Environment:
-  TALOS_VERSION        Talos release tag (default: v1.14.5)
+  TALOS_VERSION        Talos release tag (default: v1.14.6)
   SBC_BASE             sbc-raspberrypi commit the patches apply to (default: v0.2.2)
   OVERLAY_IMAGE        Full overlay image ref (default: local/sbc-raspberrypi:pr88)
   PKGS, TOOLS          pkgs/tools versions aligned with Talos release
